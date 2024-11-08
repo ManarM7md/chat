@@ -173,6 +173,7 @@ elif option == "Chat with Multiple PDFs":
                 rag_chain = create_rag_chain(retriever)
 
                 chat_input = st.text_input("Ask a question about the documents:")
+                print(chat_input)
                 if chat_input:
                     answer = rag_chain.invoke({"query": chat_input})
                     st.write(answer['result'])
