@@ -1,0 +1,6 @@
+streamlit
+langchain
+faiss-cpu
+pypdf
+pymupdf
+langchain_community
