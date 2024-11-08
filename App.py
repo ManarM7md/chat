@@ -1,6 +1,6 @@
 import streamlit as st
 import os
-from langchain.embeddings import OpenAIEmbeddings  # or use other available embedding models
+from langchain.embeddings import OpenAIEmbeddings
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import CharacterTextSplitter
@@ -8,18 +8,27 @@ from langchain.vectorstores import FAISS
 from langchain.chains import LLMChain, RetrievalQA
 from langchain.prompts import ChatPromptTemplate
 import tempfile
-from pydantic import ValidationError  # Import ValidationError from Pydantic
+from pydantic import ValidationError
 
 # Configure the Google API key
 os.environ["GOOGLE_API_KEY"] = "AIzaSyCwzEFcyhmlFNLukx8sH6jruQwhHk25js8"
 # Set the OpenAI API key
 os.environ["OPENAI_API_KEY"] = "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"
 
+# Check for sentence_transformers package and choose embeddings
+try:
+    from langchain.embeddings import SentenceTransformerEmbeddings
+    embedding_model = "sentence_transformers"  # Mark model as sentence_transformers
+except ImportError:
+    st.warning("sentence_transformers package not found. Using HuggingFaceEmbeddings instead.")
+    from langchain.embeddings import HuggingFaceEmbeddings
+    embedding_model = "huggingface"
+
 try:
     llm = ChatGoogleGenerativeAI(model="gemini-1.5-pro", temperature=0.0)
 except NameError as e:
     st.error(f"Failed to initialize LLM: {e}")
-    llm = None  # Set llm to None if initialization fails
+    llm = None
 
 # Define the question prompt
 question = '''Please analyze the following documents, which may contain multiple languages, and generate a structured survey paper format covering all relevant details from each PDF...'''
@@ -36,13 +45,13 @@ prompt = ChatPromptTemplate.from_messages([("system", system_prompt), ("human", 
 if llm:
     llm_chain = LLMChain(llm=llm, prompt=prompt)
 
-from langchain.embeddings import HuggingFaceEmbeddings
-# or
-from langchain.embeddings import SentenceTransformerEmbeddings
-
 def create_retriever(documents):
     try:
-        embeddings = HuggingFaceEmbeddings()  # or SentenceTransformerEmbeddings()
+        if embedding_model == "sentence_transformers":
+            embeddings = SentenceTransformerEmbeddings()
+        else:
+            embeddings = HuggingFaceEmbeddings()
+
         faiss_index = FAISS.from_documents(documents, embeddings)
         retriever = faiss_index.as_retriever(search_type="similarity", search_kwargs={"k": 20})
         return retriever
@@ -54,18 +63,16 @@ def create_retriever(documents):
         return None
 
 def create_rag_chain(retriever):
-    rag_chain = RetrievalQA.from_chain_type(
+    return RetrievalQA.from_chain_type(
         llm=llm,
         chain_type="stuff",
         retriever=retriever,
         chain_type_kwargs={"document_variable_name": "context"}
     )
-    return rag_chain
 
 def load_and_split_documents(pdf_files):
     documents = []
     for pdf_file in pdf_files:
-        # Save the uploaded file to a temporary file
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
             temp_file.write(pdf_file.read())
             temp_file_path = temp_file.name
@@ -107,7 +114,7 @@ if option == "AI-Powered PDF Summarizer":
     
     if st.button("Generate Summary"):
         if uploaded_files:
-            pdf_files = [pdf_file for pdf_file in uploaded_files]  # Corrected to get the file objects
+            pdf_files = [pdf_file for pdf_file in uploaded_files]
             answer = qa_system(question, pdf_files)
             st.subheader("Generated Summary")
             st.write(answer)
@@ -120,7 +127,7 @@ elif option == "Chat with Multiple PDFs":
     
     if st.button("Start Chat"):
         if uploaded_files:
-            pdf_files = [pdf_file for pdf_file in uploaded_files]  # Corrected to get the file objects
+            pdf_files = [pdf_file for pdf_file in uploaded_files]
             documents = load_and_split_documents(pdf_files)
             retriever = create_retriever(documents)
             if retriever is None:
