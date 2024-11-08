@@ -1,19 +1,22 @@
 import streamlit as st
 import os
 from langchain.embeddings import OpenAIEmbeddings  # or use other available embedding models
-from langchain.llms import OpenAI  # Using OpenAI's API as a placeholder
+from langchain.llms import ChatGoogleGenerativeAI  # Ensure correct import
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.vectorstores import FAISS
-from langchain.chains import LLMChain, StuffDocumentsChain, RetrievalQA
+from langchain.chains import LLMChain, RetrievalQA
 from langchain.prompts import ChatPromptTemplate
-from langchain.schema import Document
 
 # Configure the Google API key
 os.environ["GOOGLE_API_KEY"] = "AIzaSyCwzEFcyhmlFNLukx8sH6jruQwhHk25js8"
 
 # Initialize the language model
-llm = ChatGoogleGenerativeAI(model="gemini-1.5-pro", temperature=0.0)
+try:
+    llm = ChatGoogleGenerativeAI(model="gemini-1.5-pro", temperature=0.0)
+except NameError as e:
+    st.error(f"Failed to initialize LLM: {e}")
+    llm = None  # Set llm to None if initialization fails
 
 # Define the question prompt
 question = '''Please analyze the following documents, which may contain multiple languages, and generate a structured survey paper format covering all relevant details from each PDF...'''
@@ -26,12 +29,13 @@ system_prompt = (
 )
 prompt = ChatPromptTemplate.from_messages([("system", system_prompt), ("human", "{input}")])
 
-# Initialize LLM chain
-llm_chain = LLMChain(llm=llm, prompt=prompt)
+# Initialize LLM chain only if llm is successfully initialized
+if llm:
+    llm_chain = LLMChain(llm=llm, prompt=prompt)
 
 # Define RAG chain
 def create_retriever(documents):
-    embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
+    embeddings = OpenAIEmbeddings()  # Use appropriate embeddings
     faiss_index = FAISS.from_documents(documents, embeddings)
     retriever = faiss_index.as_retriever(search_type="similarity", search_kwargs={"k": 20})
     return retriever
@@ -78,7 +82,7 @@ if option == "AI-Powered PDF Summarizer":
     
     if st.button("Generate Summary"):
         if uploaded_files:
-            pdf_files = [pdf_file.name for pdf_file in uploaded_files]
+            pdf_files = [pdf_file for pdf_file in uploaded_files]  # Corrected to get the file objects
             answer = qa_system(question, pdf_files)
             st.subheader("Generated Summary")
             st.write(answer)
@@ -91,7 +95,7 @@ elif option == "Chat with Multiple PDFs":
     
     if st.button("Start Chat"):
         if uploaded_files:
-            pdf_files = [pdf_file.name for pdf_file in uploaded_files]
+            pdf_files = [pdf_file for pdf_file in uploaded_files]  # Corrected to get the file objects
             documents = load_and_split_documents(pdf_files)
             retriever = create_retriever(documents)
             rag_chain = create_rag_chain(retriever)
