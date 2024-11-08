@@ -36,10 +36,17 @@ if llm:
 
 # Define RAG chain
 def create_retriever(documents):
-    embeddings = OpenAIEmbeddings()  # Use appropriate embeddings
-    faiss_index = FAISS.from_documents(documents, embeddings)
-    retriever = faiss_index.as_retriever(search_type="similarity", search_kwargs={"k": 20})
-    return retriever
+    try:
+        embeddings = OpenAIEmbeddings()  # Make sure to check if additional args are needed
+        faiss_index = FAISS.from_documents(documents, embeddings)
+        retriever = faiss_index.as_retriever(search_type="similarity", search_kwargs={"k": 20})
+        return retriever
+    except ValidationError as e:
+        st.error(f"Validation error while creating embeddings: {e}")
+        return None
+    except Exception as e:
+        st.error(f"An error occurred while creating the retriever: {e}")
+        return None
 
 def create_rag_chain(retriever):
     rag_chain = RetrievalQA.from_chain_type(
