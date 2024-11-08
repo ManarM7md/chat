@@ -10,7 +10,7 @@ from langchain.prompts import ChatPromptTemplate
 from langchain.schema import Document
 
 # Configure the Google API key
-os.environ["GOOGLE_API_KEY"] = "YOUR_GOOGLE_API_KEY"
+os.environ["GOOGLE_API_KEY"] = "AIzaSyCwzEFcyhmlFNLukx8sH6jruQwhHk25js8"
 
 # Initialize the language model
 llm = ChatGoogleGenerativeAI(model="gemini-1.5-pro", temperature=0.0)
