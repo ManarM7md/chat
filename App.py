@@ -13,9 +13,8 @@ from pydantic import ValidationError  # Import ValidationError from Pydantic
 # Configure the Google API key
 os.environ["GOOGLE_API_KEY"] = "AIzaSyCwzEFcyhmlFNLukx8sH6jruQwhHk25js8"
 # Set the OpenAI API key
-#os.environ["OPENAI_API_KEY"] = "sk-proj-JpA7BaO_7OyJs9YA0ZVAcI_fmcc605fax5d-rMCy0O_E64TltmoeV45eN4mG8djTxGpGMmcH-T3BlbkFJg4-CX9UTwMKQECcg1wSmfJZ4FqoM33lEfQ-61fhpvVCcEqITagwzVeXZOl2B_yXErbpNNJZIA"  # Add your OpenAI API key here
+os.environ["OPENAI_API_KEY"] = "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"
 
-# Initialize the language model
 try:
     llm = ChatGoogleGenerativeAI(model="gemini-1.5-pro", temperature=0.0)
 except NameError as e:
