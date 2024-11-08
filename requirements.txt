@@ -2,6 +2,7 @@ streamlit
 langchain
 langchain_community
 openai
+langchain-google-genai
 langchain-google
 google-cloud
 faiss-cpu
