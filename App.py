@@ -1,6 +1,6 @@
 import streamlit as st
 import os
-from langchain.embeddings import GoogleEmbeddings
+from langchain_google import GoogleEmbeddings
 from langchain.llms import GoogleGenerativeAI
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import CharacterTextSplitter
