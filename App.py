@@ -1,7 +1,3 @@
-# Install required packages (only run once)
-!pip install streamlit langchain faiss-cpu pypdf pymupdf langchain_community
-!pip install -q -U google-generativeai
-
 import streamlit as st
 import os
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
