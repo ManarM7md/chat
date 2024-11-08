@@ -1,6 +1,7 @@
 import streamlit as st
 import os
-from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
+from langchain_google_genai import  GoogleGenerativeAIEmbeddings
+from langchain.llms import GoogleGenerativeAI
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.vectorstores import FAISS
