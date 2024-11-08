@@ -1,5 +1,3 @@
-pip install --upgrade langchain langchain-google
-
 import streamlit as st
 import os
 from langchain.embeddings import GoogleEmbeddings
