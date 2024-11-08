@@ -1,8 +1,10 @@
 streamlit
 langchain
+langchain_community
+openai
 langchain-google
 google-cloud
 faiss-cpu
 pypdf
 pymupdf
-langchain_community
+
