@@ -7,6 +7,7 @@ from langchain.text_splitter import CharacterTextSplitter
 from langchain.vectorstores import FAISS
 from langchain.chains import LLMChain, RetrievalQA
 from langchain.prompts import ChatPromptTemplate
+import tempfile
 
 # Configure the Google API key
 os.environ["GOOGLE_API_KEY"] = "AIzaSyCwzEFcyhmlFNLukx8sH6jruQwhHk25js8"
@@ -52,17 +53,25 @@ def create_rag_chain(retriever):
 def load_and_split_documents(pdf_files):
     documents = []
     for pdf_file in pdf_files:
-        loader = PyPDFLoader(pdf_file)
-        doc = loader.load()
-        text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
-        split_docs = text_splitter.split_documents(doc)
+        # Save the uploaded file to a temporary file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_file:
+            temp_file.write(pdf_file.read())
+            temp_file_path = temp_file.name
         
-        for i, doc_chunk in enumerate(split_docs):
-            doc_chunk.metadata['source'] = pdf_file
-            doc_chunk.metadata['page'] = i
-        documents.extend(split_docs)
+        try:
+            loader = PyPDFLoader(temp_file_path)
+            doc = loader.load()
+            text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
+            split_docs = text_splitter.split_documents(doc)
+            
+            for i, doc_chunk in enumerate(split_docs):
+                doc_chunk.metadata['source'] = temp_file_path
+                doc_chunk.metadata['page'] = i
+            documents.extend(split_docs)
+        except ValueError as e:
+            st.error(f"Error loading file {pdf_file.name}: {e}")
+    
     return documents
-
 def qa_system(question, pdf_files):
     documents = load_and_split_documents(pdf_files)
     retriever = create_retriever(documents)
