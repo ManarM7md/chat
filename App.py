@@ -8,11 +8,12 @@ from langchain.vectorstores import FAISS
 from langchain.chains import LLMChain, RetrievalQA
 from langchain.prompts import ChatPromptTemplate
 import tempfile
-# Define RAG chain
 from pydantic import ValidationError  # Import ValidationError from Pydantic
 
 # Configure the Google API key
 os.environ["GOOGLE_API_KEY"] = "AIzaSyCwzEFcyhmlFNLukx8sH6jruQwhHk25js8"
+# Set the OpenAI API key
+os.environ["OPENAI_API_KEY"] = "sk-proj-JpA7BaO_7OyJs9YA0ZVAcI_fmcc605fax5d-rMCy0O_E64TltmoeV45eN4mG8djTxGpGMmcH-T3BlbkFJg4-CX9UTwMKQECcg1wSmfJZ4FqoM33lEfQ-61fhpvVCcEqITagwzVeXZOl2B_yXErbpNNJZIA"  # Add your OpenAI API key here
 
 # Initialize the language model
 try:
@@ -80,9 +81,13 @@ def load_and_split_documents(pdf_files):
             st.error(f"Error loading file {pdf_file.name}: {e}")
     
     return documents
+
 def qa_system(question, pdf_files):
     documents = load_and_split_documents(pdf_files)
     retriever = create_retriever(documents)
+    if retriever is None:
+        return "Retrieval failed due to previous errors."
+    
     rag_chain = create_rag_chain(retriever)
     answer = rag_chain.invoke({"query": question})
     return answer['result']
@@ -115,11 +120,14 @@ elif option == "Chat with Multiple PDFs":
             pdf_files = [pdf_file for pdf_file in uploaded_files]  # Corrected to get the file objects
             documents = load_and_split_documents(pdf_files)
             retriever = create_retriever(documents)
-            rag_chain = create_rag_chain(retriever)
+            if retriever is None:
+                st.error("Failed to create retriever.")
+            else:
+                rag_chain = create_rag_chain(retriever)
 
-            chat_input = st.text_input("Ask a question about the documents:")
-            if chat_input:
-                answer = rag_chain.invoke({"query": chat_input})
-                st.write(answer['result'])
+                chat_input = st.text_input("Ask a question about the documents:")
+                if chat_input:
+                    answer = rag_chain.invoke({"query": chat_input})
+                    st.write(answer['result'])
         else:
             st.error("Please upload PDF files for chatting.")
