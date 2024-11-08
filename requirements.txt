@@ -8,4 +8,5 @@ google-cloud
 faiss-cpu
 pypdf
 pymupdf
+tiktoken
 
