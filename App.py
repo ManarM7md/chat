@@ -1,7 +1,7 @@
 import streamlit as st
 import os
 from langchain.embeddings import OpenAIEmbeddings  # or use other available embedding models
-from langchain.llms import ChatGoogleGenerativeAI  # Ensure correct import
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.vectorstores import FAISS
