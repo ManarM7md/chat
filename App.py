@@ -36,9 +36,13 @@ prompt = ChatPromptTemplate.from_messages([("system", system_prompt), ("human", 
 if llm:
     llm_chain = LLMChain(llm=llm, prompt=prompt)
 
+from langchain.embeddings import HuggingFaceEmbeddings
+# or
+from langchain.embeddings import SentenceTransformerEmbeddings
+
 def create_retriever(documents):
     try:
-        embeddings = OpenAIEmbeddings()  # Initialize embeddings
+        embeddings = HuggingFaceEmbeddings()  # or SentenceTransformerEmbeddings()
         faiss_index = FAISS.from_documents(documents, embeddings)
         retriever = faiss_index.as_retriever(search_type="similarity", search_kwargs={"k": 20})
         return retriever
