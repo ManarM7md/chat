@@ -8,6 +8,8 @@ from langchain.vectorstores import FAISS
 from langchain.chains import LLMChain, RetrievalQA
 from langchain.prompts import ChatPromptTemplate
 import tempfile
+# Define RAG chain
+from pydantic import ValidationError  # Import ValidationError from Pydantic
 
 # Configure the Google API key
 os.environ["GOOGLE_API_KEY"] = "AIzaSyCwzEFcyhmlFNLukx8sH6jruQwhHk25js8"
@@ -34,10 +36,9 @@ prompt = ChatPromptTemplate.from_messages([("system", system_prompt), ("human", 
 if llm:
     llm_chain = LLMChain(llm=llm, prompt=prompt)
 
-# Define RAG chain
 def create_retriever(documents):
     try:
-        embeddings = OpenAIEmbeddings()  # Make sure to check if additional args are needed
+        embeddings = OpenAIEmbeddings()  # Initialize embeddings
         faiss_index = FAISS.from_documents(documents, embeddings)
         retriever = faiss_index.as_retriever(search_type="similarity", search_kwargs={"k": 20})
         return retriever
